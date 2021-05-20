@@ -1,0 +1,20 @@
+.drop-zone{
+    width: 100%;
+    height: 100%;
+    display:grid;
+    place-items: center;
+
+    &__wrapper{
+        width: 90%;
+        height: 90%;
+        background-image: linear-gradient(to top, #ebc0fd 0%, #d9ded8 100%);
+        border-radius:16px    ;
+        -webkit-border-radius:16px    ;
+        -moz-border-radius:16px    ;
+        -ms-border-radius:16px    ;
+        -o-border-radius:16px    ;
+        display:grid;
+        place-items: center;
+
+    }
+}

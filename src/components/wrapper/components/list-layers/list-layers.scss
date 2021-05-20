@@ -1,0 +1,22 @@
+.list-layers{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 20%;
+    height: 100%;
+    background-image: linear-gradient(120deg, #a6c0fe 0%, #f68084 100%);    
+    overflow: auto;
+
+    .wrapper{
+        padding: 1rem;
+    }
+
+    ul{
+        list-style-type: none;
+
+        li{
+            margin: 0.6rem 0 0.6rem 0.5rem;
+
+        }
+    }
+}
