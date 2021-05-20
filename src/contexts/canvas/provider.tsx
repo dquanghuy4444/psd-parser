@@ -34,6 +34,7 @@ const CanvasProvider = ({ children }: Props) => {
         selection: true,
         defaultCursor: "default",
         backgroundColor: "#f3f3f3",
+        imageSmoothingEnabled: false
     }
     let c = new fabric.Canvas(el , canvasOptions);
     // initAligningGuidelines(c)

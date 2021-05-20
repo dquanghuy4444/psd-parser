@@ -9,7 +9,7 @@ function ListLayersComponent(props:any) {
   const showListLayers = () =>{
     return children.map((child : any , item:number) =>{
       if(child._children.length > 0){
-        return <GroupComponent child={ child }></GroupComponent>
+        return <GroupComponent child={ child } hasNodes={ false }></GroupComponent>
       }
       return <LayerComponent child={ child }></LayerComponent>
     })

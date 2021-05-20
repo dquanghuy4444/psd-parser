@@ -2,12 +2,10 @@ import { createContext , useReducer } from "react";
 import { ADD_PSD } from "./actions";
 import psdReducer from "./reducer";
 
-type PSD = {
-  name: string
-}
-
 type State = {
-  psd:any
+  psd:any,
+  width:number,
+  height:number,
 }
 
 type Props = {
@@ -17,7 +15,9 @@ type Props = {
 const PsdContext = createContext([]);
 
 const intialState:State = {
-  psd: {},
+  psd: null,
+  width:0,
+  height:0,
 };
 
 

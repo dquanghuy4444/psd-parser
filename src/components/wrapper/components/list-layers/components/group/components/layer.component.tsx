@@ -3,12 +3,12 @@ import "./layer.scss";
 import { BiImage , BiText } from 'react-icons/bi'
 
 function LayerComponent(props:any) {
-  const { child } = props;
+  const { child , hasNode } = props;
 
   const childExport = child.export();
 
   return (
-    <li className="">
+    <li className={ hasNode ? "has-node" : ""}>
       <span>
         { childExport.text ? <BiText></BiText> : <BiImage></BiImage>}
         

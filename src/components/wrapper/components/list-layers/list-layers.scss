@@ -15,8 +15,20 @@
         list-style-type: none;
 
         li{
-            margin: 0.6rem 0 0.6rem 0.5rem;
+            margin: 0.6rem 0 0.6rem 1rem;
+            position: relative;
 
-        }
+            &.has-node::before{
+                content:"";
+                top: -12px;
+                left: -10px;
+                content: "";
+                position: absolute;
+                width: 10px;
+                border-bottom: 2px solid black;
+                border-left: 2px solid black;
+                height: 24px;   
+            }
+        }   
     }
 }

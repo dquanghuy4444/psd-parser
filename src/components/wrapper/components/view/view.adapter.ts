@@ -1,8 +1,9 @@
 import { PsdContext } from 'contexts/psd/provider';
 import fabric from 'libraries/utils/create-new-fabric';
+import dataUrlToFile from 'libraries/utils/data-url-to-file';
 import { useCallback, useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { CanvasContext } from '../../../../contexts/canvas/provider';
-import isEmptyObject from '../../../../libraries/utils/is-empty-object';
+import isEmptyObject from 'libraries/utils/is-empty-object';
 
 
 function ViewAdapter() {
@@ -10,8 +11,10 @@ function ViewAdapter() {
   const canvasRef = useRef(null)
 
   // context
-  const { canvas, initCanvas }:any = useContext(CanvasContext);
-  const { psd }:any = useContext(PsdContext);
+  const { canvas , initCanvas }:any = useContext(CanvasContext);
+  const { psd ,  width , height }:any = useContext(PsdContext);
+
+  console.log( width , height)
 
   useEffect(() => {
     const getImage = async () =>{
@@ -22,8 +25,10 @@ function ViewAdapter() {
   
         reader.addEventListener("load", function () {
           fabric.Image.fromURL(reader.result, function(img:any) {
-            img.scaleToWidth(100);
-            canvas.add(img);
+            canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
+              scaleX: canvas.width / img.width,
+              scaleY: canvas.height / img.height
+           });
         });
   
         }, false);
@@ -38,13 +43,12 @@ function ViewAdapter() {
 
   } , [psd])
 
-  async function dataUrlToFile(dataUrl: string, fileName: string): Promise<File> {
+  // useEffect(() => {
 
-    const res: Response = await fetch(dataUrl);
-    const blob: Blob = await res.blob();
-    return new File([blob], fileName, { type: 'image/png' });
-  }
-
+  //   return () => {
+  //     canvas.dispose();
+  //   };
+  // } , [])
 
   useLayoutEffect(() => {
     initCanvas(canvasRef.current, {
@@ -77,7 +81,8 @@ function ViewAdapter() {
   }, [canvas, updateActiveObject])
 
   return {
-    canvasRef
+    canvasRef,
+    width , height
   }
 }
 
