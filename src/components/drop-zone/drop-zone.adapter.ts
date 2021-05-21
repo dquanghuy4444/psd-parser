@@ -28,7 +28,7 @@ function DropZoneAdapter() {
     e.dataTransfer.dropEffect = 'copy';
   }
 
-  function onDrop(e:any) {
+  async function onDrop(e:any) {
     e.stopPropagation();
     e.preventDefault();
 
@@ -45,7 +45,7 @@ function DropZoneAdapter() {
         throw new Error("K phải file PSD");
       }
 
-      PSD.fromEvent(e).then(function (psd:any) {
+      await PSD.fromEvent(e).then(function (psd:any) {
         const data = JSON.stringify(psd.tree().export(), undefined, 2);
         addPsd(psd);
         setIsParsing(false)

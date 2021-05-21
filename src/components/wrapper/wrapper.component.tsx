@@ -19,8 +19,8 @@ function WrapperComponent() {
       ></ListLayersComponent>
 
       <ViewComponent></ViewComponent>
+
       
-      {/* <div id="image" className="view"></div> */}
     </section>
 
   );

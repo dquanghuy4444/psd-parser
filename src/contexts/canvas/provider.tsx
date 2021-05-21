@@ -1,10 +1,11 @@
 import { createContext , useCallback, useReducer } from "react";
-import fabric from "libraries/utils/create-new-fabric";
-import { ADD_CANVAS } from "./actions";
+import fabric from "libraries/functions/create-new-fabric";
+import { ADD_CANVAS, SET_ACTIVE_OBJECT } from "./actions";
 import canvasReducer from "./reducer";
 
 type State = {
-  canvas:any
+  canvas:any,
+  activeObject:any
 }
 
 type Props = {
@@ -15,6 +16,7 @@ const CanvasContext = createContext([]);
 
 const intialState:State = {
   canvas: null,
+  activeObject: null,
 };
 
 const CanvasProvider = ({ children }: Props) => {
@@ -28,10 +30,17 @@ const CanvasProvider = ({ children }: Props) => {
     });
   };
 
+  const setActiveObject = (activeObject:any = {}) => {
+    dispatch({
+      type: SET_ACTIVE_OBJECT,
+      payload: activeObject,
+    });
+  };
+
   const initCanvas:any = useCallback((el:any) => {
     const canvasOptions = {
         preserveObjectStacking: true,
-        selection: true,
+        selection: false,
         defaultCursor: "default",
         backgroundColor: "#f3f3f3",
         imageSmoothingEnabled: false
@@ -40,14 +49,15 @@ const CanvasProvider = ({ children }: Props) => {
     // initAligningGuidelines(c)
     c.renderAll()
     addCanvas(c)
-}, [])
+  }, [])
 
   return (
     <CanvasContext.Provider
       value={{
         ...state,
         addCanvas,
-        initCanvas
+        initCanvas,
+        setActiveObject
       }}
     >
       { children }

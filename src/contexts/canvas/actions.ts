@@ -1,1 +1,2 @@
 export const ADD_CANVAS = "ADD_CANVAS";
+export const SET_ACTIVE_OBJECT = "SET_ACTIVE_OBJECT";

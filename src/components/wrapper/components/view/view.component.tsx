@@ -6,21 +6,43 @@ function ViewComponent(props:any) {
 
   const {
     canvasRef,
-    width , height
+    activeObject,
+    toggleCanvas,
+    exportToImage
   } = ViewAdapter();
 
   return (
     <div className="view flex-center">
       {
-          <canvas 
-            ref={canvasRef}
-            id="fabric-canvas"
-            width={1000}
-            height={600}
-            style={{ border: "1px solid red" }}
-          />
+        <canvas 
+          ref={canvasRef}
+          id="fabric-canvas"
+          width={0}
+          height={0}
+          style={{ border: "1px solid red" }}
+        />
       }
+
+      {
+        activeObject && (
+          <div className="options">
+            <div className="btn flex-center" onClick={ toggleCanvas }>
+              { activeObject.visible ? "Hidden" : "Visible" }
+            </div>
+          </div>
+        )
+      }
+
+      <div className="export-image">
+        <div className="btn flex-center" onClick={ () => { exportToImage("png") } }>
+          Export PNG
+        </div>
+        <div className="btn flex-center" onClick={ () => { exportToImage("jpeg") } }>
+          Export JPEG
+        </div>
+      </div>
     </div>
+    
   );
 }
 

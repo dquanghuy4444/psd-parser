@@ -4,21 +4,21 @@ import "./group.scss";
 import { BiFileBlank } from "react-icons/bi";
 
 function GroupComponent(props:any) {
-  const { child , hasNode } = props;
+  let { child , hasNode } = props;
 
   const showListLayers = () =>{
-    return child._children.map((child : any , item:number) =>{
-      if(child._children.length > 0){
-        return <GroupComponent child={ child } hasNode></GroupComponent>
+    return child._children.map((item : any , index:number) =>{
+      if(item._children.length > 0){
+        return <GroupComponent child={ item } hasNode></GroupComponent>
       }
-      return <LayerComponent child={ child } hasNode></LayerComponent>
+      return <LayerComponent child={ item }  hasNode></LayerComponent>
     })
   }
 
   return (
     <li className={ hasNode ? "has-node" : ""}>
+      <BiFileBlank></BiFileBlank>
       <span>
-        <BiFileBlank></BiFileBlank>
         { child.name }
       </span>
 
@@ -27,7 +27,8 @@ function GroupComponent(props:any) {
           showListLayers()
         }
       </ul>
-    </li>  );
+    </li>  
+  );
 }
 
 export default GroupComponent;

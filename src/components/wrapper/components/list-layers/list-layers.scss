@@ -1,3 +1,7 @@
+:root{
+    --color-li:#e67e22;
+}
+
 .list-layers{
     position: absolute;
     top: 0;
@@ -14,9 +18,11 @@
     ul{
         list-style-type: none;
 
-        li{
+        > li{
             margin: 0.6rem 0 0.6rem 1rem;
             position: relative;
+            gap: 4px;            
+            width: fit-content;
 
             &.has-node::before{
                 content:"";
@@ -28,6 +34,18 @@
                 border-bottom: 2px solid black;
                 border-left: 2px solid black;
                 height: 24px;   
+            }
+
+            .hover{
+                width: fit-content;
+
+                &:hover{
+                    background-color: var(--color-li);
+                }
+            }
+
+            .has-actived{
+                background-color: var(--color-li);
             }
         }   
     }

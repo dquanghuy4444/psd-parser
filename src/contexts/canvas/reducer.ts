@@ -1,4 +1,4 @@
-import { ADD_CANVAS } from "./actions";
+import { ADD_CANVAS , SET_ACTIVE_OBJECT } from "./actions";
 
 const canvasReducer = (state:any, action:any) => {
   switch (action.type) {
@@ -6,6 +6,11 @@ const canvasReducer = (state:any, action:any) => {
       return {
         ...state,
         canvas: action.payload
+      };
+    case SET_ACTIVE_OBJECT:
+      return {
+        ...state,
+        activeObject: action.payload
       };
 
     default:
