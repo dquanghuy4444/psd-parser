@@ -45,7 +45,8 @@ const CanvasProvider = ({ children }: Props) => {
         backgroundColor: "#f3f3f3",
         imageSmoothingEnabled: false
     }
-    let c = new fabric.Canvas(el , canvasOptions);
+    let c = new fabric.Canvas(el , canvasOptions)
+
     // initAligningGuidelines(c)
     c.renderAll()
     addCanvas(c)

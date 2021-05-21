@@ -8,7 +8,8 @@ function ViewComponent(props:any) {
     canvasRef,
     activeObject,
     toggleCanvas,
-    exportToImage
+    exportToImage,
+    backToDropZone
   } = ViewAdapter();
 
   return (
@@ -40,6 +41,10 @@ function ViewComponent(props:any) {
         <div className="btn flex-center" onClick={ () => { exportToImage("jpeg") } }>
           Export JPEG
         </div>
+      </div>
+
+      <div className="btn flex-center back-dropzone" onClick={ backToDropZone }>
+        Back
       </div>
     </div>
     

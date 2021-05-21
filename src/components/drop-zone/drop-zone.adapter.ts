@@ -6,7 +6,7 @@ const PSD = require('psd.js');
 
 function DropZoneAdapter() {
   // context
-  const { addPsd , psd }:any = useContext(PsdContext);
+  const { setPsd , psd }:any = useContext(PsdContext);
   
   // state
   const [isDisplayed , setIsDisplayed] = useState<boolean>(true);
@@ -47,7 +47,7 @@ function DropZoneAdapter() {
 
       await PSD.fromEvent(e).then(function (psd:any) {
         const data = JSON.stringify(psd.tree().export(), undefined, 2);
-        addPsd(psd);
+        setPsd(psd);
         setIsParsing(false)
 
         const dataEl = document.getElementById('data');
@@ -60,7 +60,7 @@ function DropZoneAdapter() {
       console.log(error)
       setIsParsing(false)
       setIsDisplayed(true)
-      addPsd({})
+      setPsd({})
     }
 
   }

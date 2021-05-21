@@ -7,9 +7,7 @@ const psdReducer = (state:any, action:any) => {
 
       return {
         ...state,
-        psd,
-        width: psd.tree().export().document.width * 1 / 2,
-        height: psd.tree().export().document.height * 1  / 2,
+        psd
       };
 
     default:

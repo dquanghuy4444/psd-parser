@@ -8,7 +8,6 @@ function WrapperComponent() {
 
   const {
     isDisplayed,
-    removePsd,
     children  
   } = WrapperAdapter();
 

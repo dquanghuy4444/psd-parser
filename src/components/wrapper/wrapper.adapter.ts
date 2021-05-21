@@ -6,7 +6,7 @@ import isEmptyObject from '../../libraries/utils/is-empty-object';
 function WrapperAdapter() {
 
   // context
-  const { addPsd , psd }:any = useContext(PsdContext);
+  const { psd }:any = useContext(PsdContext);
 
   // state
   const [isDisplayed , setIsDisplayed] = useState<boolean>(true);
@@ -28,14 +28,9 @@ function WrapperAdapter() {
       setChildren([])
     }
   } , [psd])
-
-  const removePsd = () =>{
-    addPsd();
-  }
   
   return {
     isDisplayed,
-    removePsd,
     children,
   }
 }

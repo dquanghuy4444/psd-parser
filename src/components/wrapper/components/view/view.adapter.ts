@@ -16,7 +16,7 @@ function ViewAdapter() {
 
   // context
   const { canvas , initCanvas , activeObject , setActiveObject }:any = useContext(CanvasContext);
-  const { psd ,  width , height }:any = useContext(PsdContext);
+  const { setPsd , psd }:any = useContext(PsdContext);
 
   useEffect(() => {
     const getBackground = async () =>{
@@ -96,6 +96,7 @@ function ViewAdapter() {
         const { coords } = desc;
         const textObj = desc.export().text;
         if(textObj){
+          console.log(textObj)
           var text = new fabric.Text(textObj.value, {
             top : coords.top / NUM_RATIO,
             left : coords.left / NUM_RATIO,
@@ -137,18 +138,38 @@ function ViewAdapter() {
 
   useLayoutEffect(() => {
     initCanvas(canvasRef.current, {
-      width,
-      height,
+      width:0,
+      height:0,
     })
   }, [canvasRef, initCanvas])
 
   const updateActiveObject = useCallback((e:any) => {
       if (!e) {
-          return
+        return
       }
       setActiveObject(canvas.getActiveObject())
       canvas.renderAll()
   }, [canvas])
+
+  
+  function preventCanvas (e:any) {
+    var obj = e.target;
+    // if object is too big ignore
+    if(obj.currentHeight > obj.canvas.height || obj.currentWidth > obj.canvas.width){
+        return;
+    }        
+    obj.setCoords();        
+    // top-left  corner
+    if(obj.getBoundingRect().top < 0 || obj.getBoundingRect().left < 0){
+        obj.top = Math.max(obj.top, obj.top-obj.getBoundingRect().top);
+        obj.left = Math.max(obj.left, obj.left-obj.getBoundingRect().left);
+    }
+    // bot-right corner
+    if(obj.getBoundingRect().top+obj.getBoundingRect().height  > obj.canvas.height || obj.getBoundingRect().left+obj.getBoundingRect().width  > obj.canvas.width){
+        obj.top = Math.min(obj.top, obj.canvas.height-obj.getBoundingRect().height+obj.top-obj.getBoundingRect().top);
+        obj.left = Math.min(obj.left, obj.canvas.width-obj.getBoundingRect().width+obj.left-obj.getBoundingRect().left);
+    }
+  }
 
   useEffect(() => {
       if (!canvas || isEmptyObject(canvas)) {
@@ -157,11 +178,13 @@ function ViewAdapter() {
       canvas.on("selection:created", updateActiveObject)
       canvas.on("selection:updated", updateActiveObject)
       canvas.on("selection:cleared", updateActiveObject)
+      canvas.on("object:moving", preventCanvas)
 
       return () => {
           canvas.off("selection:created")
           canvas.off("selection:cleared")
           canvas.off("selection:updated")
+          canvas.off("object:moving")
       }
   }, [canvas, updateActiveObject]);
 
@@ -190,11 +213,19 @@ function ViewAdapter() {
     link.remove();
   }
 
+  const backToDropZone = () =>{
+    setPsd(null)
+    setActiveObject(null)
+    
+    canvas.clear();
+  }
+
   return {
     canvasRef,
     activeObject,
     toggleCanvas,
-    exportToImage
+    exportToImage,
+    backToDropZone
   }
 }
 

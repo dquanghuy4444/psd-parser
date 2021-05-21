@@ -4,8 +4,6 @@ import psdReducer from "./reducer";
 
 type State = {
   psd:any,
-  width:number,
-  height:number,
 }
 
 type Props = {
@@ -15,9 +13,7 @@ type Props = {
 const PsdContext = createContext([]);
 
 const intialState:State = {
-  psd: null,
-  width:0,
-  height:0,
+  psd: null
 };
 
 
@@ -25,7 +21,7 @@ const PsdProvider = ({ children }: Props) => {
 
   const [state, dispatch] = useReducer(psdReducer, intialState);
 
-  const addPsd = (psd:any = {}) => {
+  const setPsd = (psd:any = {}) => {
     dispatch({
       type: ADD_PSD,
       payload: psd,
@@ -36,7 +32,7 @@ const PsdProvider = ({ children }: Props) => {
     <PsdContext.Provider
       value={{
         ...state,
-        addPsd
+        setPsd
       }}
     >
       { children }
