@@ -8,7 +8,6 @@ const getVisibleStateByParent = (layer: any) => {
     let isVisible = layer.layer.visible;
     if (isVisible) {
         let parent = layer.parent;
-        console.log(parent)
         while (parent) {
             if (parent) {
                 isVisible = parent.layer?.visible ?? isVisible;

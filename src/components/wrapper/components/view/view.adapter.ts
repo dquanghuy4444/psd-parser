@@ -17,64 +17,64 @@ function ViewAdapter() {
   const numScaleRef = useRef<number>(NUM_DEFAULT_SCALE);
 
   // context
-  const { canvas , initCanvas , activeObject , setActiveObject }:any = useContext(CanvasContext);
-  const { setPsd , psd }:any = useContext(PsdContext);
+  const { canvas, initCanvas, activeObject, setActiveObject }: any = useContext(CanvasContext);
+  const { setPsd, psd }: any = useContext(PsdContext);
 
   // state
-  const [bgHasDone , setBgHasDone] = useState<boolean>(false);
-  const [isLoading , setIsLoading] = useState<boolean>(false);
+  const [bgHasDone, setBgHasDone] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    const getBackground = async () =>{
-      if(!psd  || isEmptyObject(psd)){
-        return;
-      }
-  
-      if(!canvas || isEmptyObject(canvas)){
-        return;
-      }
-  
-      const descendants = await psd.tree().descendants();
-      if(descendants.length <= 0){
+    const getBackground = async () => {
+      if (!psd || isEmptyObject(psd)) {
         return;
       }
 
-      const layerBackground = descendants.find((desc:any) => desc.name === NAME_BACKGROUND);
-      if(!layerBackground || isEmptyObject(layerBackground)){
+      if (!canvas || isEmptyObject(canvas)) {
+        return;
+      }
+
+      const descendants = await psd.tree().descendants();
+      if (descendants.length <= 0) {
+        return;
+      }
+
+      const layerBackground = descendants.find((desc: any) => desc.name === NAME_BACKGROUND);
+      if (!layerBackground || isEmptyObject(layerBackground)) {
         alert(`K tìm thấy layer có tên ${NAME_BACKGROUND}`)
         return backToDropZone();
       }
 
       setIsLoading(true);
       let base64 = await layerBackground.layer.image.toBase64();
-      let file = await dataUrlToFile(base64 , "abc.png");
-      
+      let file = await dataUrlToFile(base64, "abc.png");
+
       let reader = new FileReader();
 
       reader.addEventListener("load", async function () {
-        await fabric.Image.fromURL(reader.result , async function(img:any) {
+        await fabric.Image.fromURL(reader.result, async function (img: any) {
           const viewEl = document.getElementById("view");
           const viewWidth = viewEl?.offsetWidth ?? 1;
           const viewHeight = viewEl?.offsetHeight ?? 1;
 
           const imgWidth = img.width;
-          const imgHeight= img.height;
+          const imgHeight = img.height;
 
           const ratioWidth = imgWidth / viewWidth;
           const ratioHeight = imgHeight / viewHeight;
 
-          if(ratioWidth > NUM_DEFAULT_SCALE && ratioHeight > NUM_DEFAULT_SCALE){
-            numScaleRef.current = Math.max(ratioWidth , ratioHeight) * NUM_EXTEND_RATIO;
+          if (ratioWidth > NUM_DEFAULT_SCALE && ratioHeight > NUM_DEFAULT_SCALE) {
+            numScaleRef.current = Math.max(ratioWidth, ratioHeight) * NUM_EXTEND_RATIO;
           }
 
           setBgHasDone(true)
 
-          canvas.setDimensions({width:imgWidth / numScaleRef.current, height:imgHeight / numScaleRef.current});
+          canvas.setDimensions({ width: imgWidth / numScaleRef.current, height: imgHeight / numScaleRef.current });
           await canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
             scaleX: canvas.width / imgWidth,
             scaleY: canvas.height / imgHeight
           });
-      });
+        });
 
       }, false);
 
@@ -84,11 +84,11 @@ function ViewAdapter() {
     }
 
     getBackground();
-  } , [psd , canvas])
+  }, [psd, canvas])
 
   useEffect(() => {
-    const getLayers = async () =>{
-      if(!bgHasDone){
+    const getLayers = async () => {
+      if (!bgHasDone) {
         return;
       }
 
@@ -96,13 +96,14 @@ function ViewAdapter() {
 
       const numScale = numScaleRef.current;
 
-      await descendants.forEach(async (desc:any) => {
+      console.time("abbbbb")
+      await descendants.forEach(async (desc: any) => {
 
-        if(isEmptyObject(desc)){
+        if (isEmptyObject(desc)) {
           return;
         }
 
-        if(desc.hasChildren() || desc.name === NAME_BACKGROUND){
+        if (desc.hasChildren() || desc.name === NAME_BACKGROUND) {
           return;
         }
 
@@ -111,12 +112,12 @@ function ViewAdapter() {
 
         const { coords } = desc;
         const textObj = await desc.export().text;
-        if(textObj){
-          var text =  await new fabric.Text(textObj.value, {
-            top : coords.top / numScale,
-            left : coords.left / numScale,
-            bottom : coords.bottom / numScale,
-            right : coords.right / numScale,
+        if (textObj) {
+          var text = await new fabric.Text(textObj.value, {
+            top: coords.top / numScale,
+            left: coords.left / numScale,
+            bottom: coords.bottom / numScale,
+            right: coords.right / numScale,
             fontSize: textObj.font.sizes[0] / numScale,
             fontFamily: 'Verdana',
             fill: 'black'
@@ -126,12 +127,13 @@ function ViewAdapter() {
 
           canvas.add(text);
 
-        } else{
+        } else {
+          console.log(desc.layer.image);
           let base64 = await desc.layer.image.toBase64();
-          await fabric.Image.fromURL(base64, function(img:any) {
+          await fabric.Image.fromURL(base64, function (img: any) {
             img.scaleToWidth(img.width / numScale);
             img.scaleToHeight(img.height / numScale);
-  
+
             img.top = coords.top / numScale;
             img.left = coords.left / numScale;
             img.bottom = coords.bottom / numScale;
@@ -141,10 +143,13 @@ function ViewAdapter() {
             img.visible = isVisible;
 
             canvas.add(img);
-            
+
           });
-        } 
+        }
       })
+
+      console.timeEnd("abbbbb")
+
       await canvas.renderAll();
 
       setBgHasDone(false);
@@ -153,77 +158,77 @@ function ViewAdapter() {
 
     getLayers();
 
-  } ,[bgHasDone])
+  }, [bgHasDone])
 
 
   useLayoutEffect(() => {
     initCanvas(canvasRef.current, {
-      width:0,
-      height:0,
+      width: 0,
+      height: 0,
     })
   }, [canvasRef, initCanvas])
 
-  const updateActiveObject = useCallback((e:any) => {
-      if (!e) {
-        return
-      }
-      setActiveObject(canvas.getActiveObject())
-      canvas.renderAll()
+  const updateActiveObject = useCallback((e: any) => {
+    if (!e) {
+      return
+    }
+    setActiveObject(canvas.getActiveObject())
+    canvas.renderAll()
   }, [canvas])
 
-  
-  function preventCanvas (e:any) {
+
+  function preventCanvas(e: any) {
     var obj = e.target;
     // if object is too big ignore
-    if(obj.currentHeight > obj.canvas.height || obj.currentWidth > obj.canvas.width){
-        return;
-    }        
-    obj.setCoords();        
+    if (obj.currentHeight > obj.canvas.height || obj.currentWidth > obj.canvas.width) {
+      return;
+    }
+    obj.setCoords();
     // top-left  corner
-    if(obj.getBoundingRect().top < 0 || obj.getBoundingRect().left < 0){
-        obj.top = Math.max(obj.top, obj.top-obj.getBoundingRect().top);
-        obj.left = Math.max(obj.left, obj.left-obj.getBoundingRect().left);
+    if (obj.getBoundingRect().top < 0 || obj.getBoundingRect().left < 0) {
+      obj.top = Math.max(obj.top, obj.top - obj.getBoundingRect().top);
+      obj.left = Math.max(obj.left, obj.left - obj.getBoundingRect().left);
     }
     // bot-right corner
-    if(obj.getBoundingRect().top+obj.getBoundingRect().height  > obj.canvas.height || obj.getBoundingRect().left+obj.getBoundingRect().width  > obj.canvas.width){
-        obj.top = Math.min(obj.top, obj.canvas.height-obj.getBoundingRect().height+obj.top-obj.getBoundingRect().top);
-        obj.left = Math.min(obj.left, obj.canvas.width-obj.getBoundingRect().width+obj.left-obj.getBoundingRect().left);
+    if (obj.getBoundingRect().top + obj.getBoundingRect().height > obj.canvas.height || obj.getBoundingRect().left + obj.getBoundingRect().width > obj.canvas.width) {
+      obj.top = Math.min(obj.top, obj.canvas.height - obj.getBoundingRect().height + obj.top - obj.getBoundingRect().top);
+      obj.left = Math.min(obj.left, obj.canvas.width - obj.getBoundingRect().width + obj.left - obj.getBoundingRect().left);
     }
   }
 
   useEffect(() => {
-      if (!canvas || isEmptyObject(canvas)) {
-        return
-      }
-      canvas.on("selection:created", updateActiveObject)
-      canvas.on("selection:updated", updateActiveObject)
-      canvas.on("selection:cleared", updateActiveObject)
-      canvas.on("object:moving", preventCanvas)
+    if (!canvas || isEmptyObject(canvas)) {
+      return
+    }
+    canvas.on("selection:created", updateActiveObject)
+    canvas.on("selection:updated", updateActiveObject)
+    canvas.on("selection:cleared", updateActiveObject)
+    canvas.on("object:moving", preventCanvas)
 
-      return () => {
-        canvas.off("selection:created")
-        canvas.off("selection:cleared")
-        canvas.off("selection:updated")
-        canvas.off("object:moving")
-      }
+    return () => {
+      canvas.off("selection:created")
+      canvas.off("selection:cleared")
+      canvas.off("selection:updated")
+      canvas.off("object:moving")
+    }
   }, [canvas, updateActiveObject]);
 
-  const toggleCanvas = () =>{
+  const toggleCanvas = () => {
     setActiveObject({
       ...activeObject,
-      visible:!activeObject.visible
+      visible: !activeObject.visible
     })
 
-    canvas.getObjects().forEach(function(o:any) {
-      if(o.id === activeObject.id) {
+    canvas.getObjects().forEach(function (o: any) {
+      if (o.id === activeObject.id) {
         o.visible = !o.visible;
-      }   
+      }
     })
 
     canvas.renderAll();
   }
 
-  async function exportToImage (ext:string = "png"){
+  async function exportToImage(ext: string = "png") {
     const image = await canvas.toDataURL(`image/${ext}`, 1.0).replace(`image/${ext}`, "image/octet-stream");
 
     const link = document.createElement('a');
@@ -233,10 +238,10 @@ function ViewAdapter() {
     link.remove();
   }
 
-  const backToDropZone = () =>{
+  const backToDropZone = () => {
     setPsd(null)
     setActiveObject(null)
-    
+
     canvas?.clear();
   }
 
