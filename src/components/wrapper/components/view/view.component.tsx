@@ -10,7 +10,8 @@ function ViewComponent(props:any) {
     toggleCanvas,
     exportToImage,
     backToDropZone,
-    isLoading
+    isLoading,
+    exportToJson
   } = ViewAdapter();
 
   return (
@@ -24,7 +25,7 @@ function ViewComponent(props:any) {
           style={{ border: "1px solid red" }}
         />
       }
-
+      <div className="d-none" id="img-psd"></div>
       {
         activeObject && (
           <div className="options">
@@ -41,6 +42,9 @@ function ViewComponent(props:any) {
         </div>
         <div className="btn flex-center" onClick={ () => { exportToImage("jpeg") } }>
           Export JPEG
+        </div>
+        <div className="btn flex-center" onClick={ exportToJson }>
+          Export JSON
         </div>
       </div>
 

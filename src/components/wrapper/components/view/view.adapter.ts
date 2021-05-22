@@ -97,8 +97,8 @@ function ViewAdapter() {
       const numScale = numScaleRef.current;
 
       console.time("abbbbb")
-      await descendants.forEach(async (desc: any) => {
 
+      await descendants.forEach(async (desc: any) => {
         if (isEmptyObject(desc)) {
           return;
         }
@@ -128,7 +128,6 @@ function ViewAdapter() {
           canvas.add(text);
 
         } else {
-          console.log(desc.layer.image);
           let base64 = await desc.layer.image.toBase64();
           await fabric.Image.fromURL(base64, function (img: any) {
             img.scaleToWidth(img.width / numScale);
@@ -143,14 +142,13 @@ function ViewAdapter() {
             img.visible = isVisible;
 
             canvas.add(img);
-
           });
         }
       })
+      canvas.renderAll();
 
       console.timeEnd("abbbbb")
 
-      await canvas.renderAll();
 
       setBgHasDone(false);
       setIsLoading(false);
@@ -213,6 +211,38 @@ function ViewAdapter() {
     }
   }, [canvas, updateActiveObject]);
 
+  function scaleCanvas(factor: any) {
+    canvas.setHeight(canvas.getHeight() * factor);
+    canvas.setWidth(canvas.getWidth() * factor);
+
+    if (canvas.backgroundImage) {
+      canvas.backgroundImage.scaleToWidth(canvas.backgroundImage.width * factor);
+      canvas.backgroundImage.scaleToHeight(canvas.backgroundImage.height * factor);
+    }
+
+    var objects = canvas.getObjects();
+    for (var i in objects) {
+      var scaleX = objects[i].scaleX;
+      var scaleY = objects[i].scaleY;
+      var left = objects[i].left;
+      var top = objects[i].top;
+
+      var tempScaleX = scaleX * factor;
+      var tempScaleY = scaleY * factor;
+      var tempLeft = left * factor;
+      var tempTop = top * factor;
+
+      objects[i].scaleX = tempScaleX;
+      objects[i].scaleY = tempScaleY;
+      objects[i].left = tempLeft;
+      objects[i].top = tempTop;
+
+      objects[i].setCoords();
+    }
+    canvas.renderAll();
+    canvas.calcOffset();
+  }
+
   const toggleCanvas = () => {
     setActiveObject({
       ...activeObject,
@@ -229,6 +259,8 @@ function ViewAdapter() {
   }
 
   async function exportToImage(ext: string = "png") {
+    scaleCanvas(numScaleRef.current);
+
     const image = await canvas.toDataURL(`image/${ext}`, 1.0).replace(`image/${ext}`, "image/octet-stream");
 
     const link = document.createElement('a');
@@ -236,6 +268,9 @@ function ViewAdapter() {
     link.href = image;
     link.click();
     link.remove();
+
+    scaleCanvas(1 / numScaleRef.current);
+
   }
 
   const backToDropZone = () => {
@@ -245,13 +280,18 @@ function ViewAdapter() {
     canvas?.clear();
   }
 
+  const exportToJson = () => {
+
+  }
+
   return {
     canvasRef,
     activeObject,
     toggleCanvas,
     exportToImage,
     backToDropZone,
-    isLoading
+    isLoading,
+    exportToJson
   }
 }
 
