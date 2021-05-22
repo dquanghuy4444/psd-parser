@@ -94,9 +94,7 @@ function ViewAdapter() {
 
       const descendants = await psd.tree().descendants().reverse();
 
-
       const numScale = numScaleRef.current;
-      console.log(descendants)
 
       await descendants.forEach(async (desc:any) => {
 
@@ -127,6 +125,7 @@ function ViewAdapter() {
           text.visible = isVisible;
 
           canvas.add(text);
+
         } else{
           let base64 = await desc.layer.image.toBase64();
           await fabric.Image.fromURL(base64, function(img:any) {
@@ -146,6 +145,7 @@ function ViewAdapter() {
           });
         } 
       })
+      await canvas.renderAll();
 
       setBgHasDone(false);
       setIsLoading(false);
