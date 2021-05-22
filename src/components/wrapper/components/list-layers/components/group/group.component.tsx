@@ -9,9 +9,9 @@ function GroupComponent(props:any) {
   const showListLayers = () =>{
     return child._children.map((item : any , index:number) =>{
       if(item._children.length > 0){
-        return <GroupComponent child={ item } hasNode></GroupComponent>
+        return <GroupComponent child={ item } hasNode key={ index }></GroupComponent>
       }
-      return <LayerComponent child={ item }  hasNode></LayerComponent>
+      return <LayerComponent child={ item }  hasNode key={ index }></LayerComponent>
     })
   }
 
@@ -20,6 +20,7 @@ function GroupComponent(props:any) {
       <BiFileBlank></BiFileBlank>
       <span>
         { child.name }
+        { child.layer.visible ? "" : "(hidden)" }
       </span>
 
       <ul> 

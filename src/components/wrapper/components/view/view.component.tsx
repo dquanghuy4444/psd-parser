@@ -9,11 +9,12 @@ function ViewComponent(props:any) {
     activeObject,
     toggleCanvas,
     exportToImage,
-    backToDropZone
+    backToDropZone,
+    isLoading
   } = ViewAdapter();
 
   return (
-    <div className="view flex-center">
+    <div className="view flex-center" id="view">
       {
         <canvas 
           ref={canvasRef}
@@ -46,6 +47,13 @@ function ViewComponent(props:any) {
       <div className="btn flex-center back-dropzone" onClick={ backToDropZone }>
         Back
       </div>
+      {
+        isLoading && (
+          <div className="overlay-background">
+            <div className="loading-spinner big"></div>
+          </div>
+        )
+      }
     </div>
     
   );
