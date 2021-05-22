@@ -8,17 +8,18 @@ function DropZoneComponent() {
     onDragOver , 
     onDrop ,
     isDisplayed,
-    isParsing
+    isParsing,
+    openFileSeletor
   } = DropZoneAdapter();
 
   return (
     <section className={"drop-zone " + (isDisplayed ? "" : "d-none")}>
-      <div className="drop-zone__wrapper"  onDrop={ onDrop } onDragOver={ onDragOver }>
+      <div className="drop-zone__wrapper cursor-pointer"  onDrop={ onDrop } onDragOver={ onDragOver } onClick={ openFileSeletor }>
         {
           isParsing ? (
             <p>Parsing file PSD...</p>
           ) : (
-            <p>Drop here</p>
+            <p>Drop here or upload</p>
           )
         }
       </div>

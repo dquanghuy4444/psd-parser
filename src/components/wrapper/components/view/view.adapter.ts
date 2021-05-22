@@ -18,35 +18,42 @@ function ViewAdapter() {
   const { canvas , initCanvas , activeObject , setActiveObject }:any = useContext(CanvasContext);
   const { setPsd , psd }:any = useContext(PsdContext);
 
+  const [bgHasDone , setBgHasDone] = useState<boolean>(false);
+
   useEffect(() => {
     const getBackground = async () =>{
+      console.log("get background")
+
       if(!psd  || isEmptyObject(psd)){
-        return false;
+        return;
       }
   
       if(!canvas  || isEmptyObject(canvas)){
-        return false;
+        return;
       }
   
-      const descendants = psd.tree().descendants();
+      const descendants = await psd.tree().descendants();
       if(descendants.length <= 0){
-        return false;
-      }
-
-      const layerBackground = descendants.find((desc:any) => desc.name === NAME_BACKGROUND);
-      if(isEmptyObject(layerBackground)){
         return;
       }
 
-      let base64 = layerBackground.layer.image.toBase64();
+      const layerBackground = descendants.find((desc:any) => desc.name === NAME_BACKGROUND);
+      if(!layerBackground || isEmptyObject(layerBackground)){
+        alert(`K tìm thấy layer có tên ${NAME_BACKGROUND}`)
+        return backToDropZone();
+      }
+
+      setBgHasDone(true)
+
+      let base64 = await layerBackground.layer.image.toBase64();
       let file = await dataUrlToFile(base64 , "abc.png");
       
       let reader = new FileReader();
 
-      reader.addEventListener("load", function () {
-        fabric.Image.fromURL(reader.result, function(img:any) {
+      reader.addEventListener("load", async function () {
+        await fabric.Image.fromURL(reader.result , async function(img:any) {
           canvas.setDimensions({width:img.width / NUM_RATIO, height:img.height / NUM_RATIO});
-          canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
+          await canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
             scaleX: canvas.width / img.width,
             scaleY: canvas.height / img.height
           });
@@ -55,7 +62,7 @@ function ViewAdapter() {
       }, false);
 
       if (file) {
-        reader.readAsDataURL(file)
+        await reader.readAsDataURL(file);
       }
     }
 
@@ -63,20 +70,12 @@ function ViewAdapter() {
   } , [psd , canvas])
 
   useEffect(() => {
-    const getLayers = () =>{
-      if(!psd  || isEmptyObject(psd)){
+    const getLayers = async () =>{
+      if(!bgHasDone){
         return;
       }
 
-      if(!canvas  || isEmptyObject(canvas)){
-        return;
-      }
-
-      const descendants = psd.tree().descendants();
-      console.log(descendants);
-      if(descendants.length <= 0){
-        return ;
-      }
+      const descendants = await psd.tree().descendants();
 
       descendants.forEach((desc:any) =>{
         if(isEmptyObject(desc)){
@@ -96,7 +95,6 @@ function ViewAdapter() {
         const { coords } = desc;
         const textObj = desc.export().text;
         if(textObj){
-          console.log(textObj)
           var text = new fabric.Text(textObj.value, {
             top : coords.top / NUM_RATIO,
             left : coords.left / NUM_RATIO,
@@ -109,8 +107,6 @@ function ViewAdapter() {
           text.id = id;
           text.visible = desc.layer.visible;
           canvas.add(text);
-
-
         } else{
           let base64 = desc.layer.image.toBase64();
           fabric.Image.fromURL(base64, function(img:any) {
@@ -126,14 +122,16 @@ function ViewAdapter() {
             img.visible = desc.layer.visible;
 
             canvas.add(img);
-            canvas.renderAll();
           });
         }
       })
+
+      canvas.renderAll();
+      setBgHasDone(false);
     }
 
     getLayers();
-  } ,[psd , canvas])
+  } ,[bgHasDone])
 
 
   useLayoutEffect(() => {
@@ -181,10 +179,10 @@ function ViewAdapter() {
       canvas.on("object:moving", preventCanvas)
 
       return () => {
-          canvas.off("selection:created")
-          canvas.off("selection:cleared")
-          canvas.off("selection:updated")
-          canvas.off("object:moving")
+        canvas.off("selection:created")
+        canvas.off("selection:cleared")
+        canvas.off("selection:updated")
+        canvas.off("object:moving")
       }
   }, [canvas, updateActiveObject]);
 
@@ -203,8 +201,8 @@ function ViewAdapter() {
     canvas.renderAll();
   }
 
-  function exportToImage (ext:string = "png"){
-    const image = canvas.toDataURL(`image/${ext}`, 1.0).replace(`image/${ext}`, "image/octet-stream");
+  async function exportToImage (ext:string = "png"){
+    const image = await canvas.toDataURL(`image/${ext}`, 1.0).replace(`image/${ext}`, "image/octet-stream");
     const link = document.createElement('a');
     link.download = `image.${ext}`;
     link.href = image;
@@ -217,7 +215,7 @@ function ViewAdapter() {
     setPsd(null)
     setActiveObject(null)
     
-    canvas.clear();
+    canvas?.clear();
   }
 
   return {
