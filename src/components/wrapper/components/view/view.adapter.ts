@@ -5,30 +5,32 @@ import { useCallback, useContext, useEffect, useLayoutEffect, useRef, useState }
 import { CanvasContext } from '../../../../contexts/canvas/provider';
 import isEmptyObject from 'libraries/utils/is-empty-object';
 import createIdByParentName from 'libraries/functions/create-id-by-parent-name';
+import getVisibleStateByParent from 'libraries/functions/get-visible-state-by-parent';
 
 function ViewAdapter() {
-
   const NAME_BACKGROUND = 'Background';
-  const NUM_RATIO:number = 3;
+  const NUM_EXTEND_RATIO = 1.2;
+  const NUM_DEFAULT_SCALE = 1;
 
   // ref
   const canvasRef = useRef(null)
+  const numScaleRef = useRef<number>(NUM_DEFAULT_SCALE);
 
   // context
   const { canvas , initCanvas , activeObject , setActiveObject }:any = useContext(CanvasContext);
   const { setPsd , psd }:any = useContext(PsdContext);
 
+  // state
   const [bgHasDone , setBgHasDone] = useState<boolean>(false);
+  const [isLoading , setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
     const getBackground = async () =>{
-      console.log("get background")
-
       if(!psd  || isEmptyObject(psd)){
         return;
       }
   
-      if(!canvas  || isEmptyObject(canvas)){
+      if(!canvas || isEmptyObject(canvas)){
         return;
       }
   
@@ -43,8 +45,7 @@ function ViewAdapter() {
         return backToDropZone();
       }
 
-      setBgHasDone(true)
-
+      setIsLoading(true);
       let base64 = await layerBackground.layer.image.toBase64();
       let file = await dataUrlToFile(base64 , "abc.png");
       
@@ -52,10 +53,26 @@ function ViewAdapter() {
 
       reader.addEventListener("load", async function () {
         await fabric.Image.fromURL(reader.result , async function(img:any) {
-          canvas.setDimensions({width:img.width / NUM_RATIO, height:img.height / NUM_RATIO});
+          const viewEl = document.getElementById("view");
+          const viewWidth = viewEl?.offsetWidth ?? 1;
+          const viewHeight = viewEl?.offsetHeight ?? 1;
+
+          const imgWidth = img.width;
+          const imgHeight= img.height;
+
+          const ratioWidth = imgWidth / viewWidth;
+          const ratioHeight = imgHeight / viewHeight;
+
+          if(ratioWidth > NUM_DEFAULT_SCALE && ratioHeight > NUM_DEFAULT_SCALE){
+            numScaleRef.current = Math.max(ratioWidth , ratioHeight) * NUM_EXTEND_RATIO;
+          }
+
+          setBgHasDone(true)
+
+          canvas.setDimensions({width:imgWidth / numScaleRef.current, height:imgHeight / numScaleRef.current});
           await canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
-            scaleX: canvas.width / img.width,
-            scaleY: canvas.height / img.height
+            scaleX: canvas.width / imgWidth,
+            scaleY: canvas.height / imgHeight
           });
       });
 
@@ -75,9 +92,14 @@ function ViewAdapter() {
         return;
       }
 
-      const descendants = await psd.tree().descendants();
+      const descendants = await psd.tree().descendants().reverse();
 
-      descendants.forEach((desc:any) =>{
+
+      const numScale = numScaleRef.current;
+      console.log(descendants)
+
+      await descendants.forEach(async (desc:any) => {
+
         if(isEmptyObject(desc)){
           return;
         }
@@ -87,50 +109,50 @@ function ViewAdapter() {
         }
 
         const id = createIdByParentName(desc);
-
-        // if(!desc.layer.visible){
-        //   return;
-        // }
+        const isVisible = getVisibleStateByParent(desc);
 
         const { coords } = desc;
-        const textObj = desc.export().text;
+        const textObj = await desc.export().text;
         if(textObj){
-          var text = new fabric.Text(textObj.value, {
-            top : coords.top / NUM_RATIO,
-            left : coords.left / NUM_RATIO,
-            bottom : coords.bottom / NUM_RATIO,
-            right : coords.right / NUM_RATIO,
-            fontSize: textObj.font.sizes[0] / NUM_RATIO,
+          var text =  await new fabric.Text(textObj.value, {
+            top : coords.top / numScale,
+            left : coords.left / numScale,
+            bottom : coords.bottom / numScale,
+            right : coords.right / numScale,
+            fontSize: textObj.font.sizes[0] / numScale,
             fontFamily: 'Verdana',
             fill: 'black'
           });
           text.id = id;
-          text.visible = desc.layer.visible;
+          text.visible = isVisible;
+
           canvas.add(text);
         } else{
-          let base64 = desc.layer.image.toBase64();
-          fabric.Image.fromURL(base64, function(img:any) {
-            img.scaleToWidth(img.width / NUM_RATIO);
-            img.scaleToHeight(img.height / NUM_RATIO);
+          let base64 = await desc.layer.image.toBase64();
+          await fabric.Image.fromURL(base64, function(img:any) {
+            img.scaleToWidth(img.width / numScale);
+            img.scaleToHeight(img.height / numScale);
   
-            img.top = coords.top / NUM_RATIO;
-            img.left = coords.left / NUM_RATIO;
-            img.bottom = coords.bottom / NUM_RATIO;
-            img.right = coords.right / NUM_RATIO;
+            img.top = coords.top / numScale;
+            img.left = coords.left / numScale;
+            img.bottom = coords.bottom / numScale;
+            img.right = coords.right / numScale;
 
             img.id = id;
-            img.visible = desc.layer.visible;
+            img.visible = isVisible;
 
             canvas.add(img);
+            
           });
-        }
+        } 
       })
 
-      canvas.renderAll();
       setBgHasDone(false);
+      setIsLoading(false);
     }
 
     getLayers();
+
   } ,[bgHasDone])
 
 
@@ -203,11 +225,11 @@ function ViewAdapter() {
 
   async function exportToImage (ext:string = "png"){
     const image = await canvas.toDataURL(`image/${ext}`, 1.0).replace(`image/${ext}`, "image/octet-stream");
+
     const link = document.createElement('a');
     link.download = `image.${ext}`;
     link.href = image;
     link.click();
-
     link.remove();
   }
 
@@ -223,7 +245,8 @@ function ViewAdapter() {
     activeObject,
     toggleCanvas,
     exportToImage,
-    backToDropZone
+    backToDropZone,
+    isLoading
   }
 }
 

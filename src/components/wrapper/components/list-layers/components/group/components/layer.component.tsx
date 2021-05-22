@@ -3,6 +3,7 @@ import "./layer.scss";
 import { BiImage , BiText } from 'react-icons/bi'
 import { CanvasContext } from 'contexts/canvas/provider';
 import createIdByParentName from 'libraries/functions/create-id-by-parent-name';
+import getVisibleStateByParent from 'libraries/functions/get-visible-state-by-parent';
 
 function LayerComponent(props:any) {
   const { child , hasNode } = props;
@@ -18,9 +19,11 @@ function LayerComponent(props:any) {
           canvas.setActiveObject(o);
           console.log(o.id)
       }   
-  })
+    })
   }
 
+
+  const isVisible = getVisibleStateByParent(child);
 
   const childExport = child.export();
 
@@ -32,7 +35,7 @@ function LayerComponent(props:any) {
       { childExport.text ? <BiText></BiText> : <BiImage></BiImage>}
       <span>        
         { child.name }
-        { child.layer.visible ? "" : "(hidden)" }
+        { isVisible ? "" : "(hidden)" }
       </span>    
     </li>
   );
