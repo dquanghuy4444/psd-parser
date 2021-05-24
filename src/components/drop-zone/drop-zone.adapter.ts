@@ -7,7 +7,7 @@ const PSD = require('psd.js');
 
 function DropZoneAdapter() {
   // context
-  const { setPsd , psd }:any = useContext(PsdContext);
+  const { setPsd , psd , setDescendants }:any = useContext(PsdContext);
   
   // state
   const [isDisplayed , setIsDisplayed] = useState<boolean>(true);
@@ -77,6 +77,7 @@ function DropZoneAdapter() {
 
       await PSD.fromURL(pathFile).then(function (psd:any) {
         setPsd(psd);
+        setDescendants(psd.tree().descendants());
       });
 
     } catch (error) {

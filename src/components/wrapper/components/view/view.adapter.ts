@@ -4,7 +4,6 @@ import dataUrlToFile from 'libraries/utils/data-url-to-file';
 import { useCallback, useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { CanvasContext } from '../../../../contexts/canvas/provider';
 import isEmptyObject from 'libraries/utils/is-empty-object';
-import createIdByParentName from 'libraries/functions/create-id-by-parent-name';
 import getVisibleStateByParent from 'libraries/functions/get-visible-state-by-parent';
 
 function ViewAdapter() {
@@ -17,8 +16,8 @@ function ViewAdapter() {
   const numScaleRef = useRef<number>(NUM_DEFAULT_SCALE);
 
   // context
-  const { canvas, initCanvas, activeObject, setActiveObject }: any = useContext(CanvasContext);
-  const { setPsd, psd }: any = useContext(PsdContext);
+  const { canvas , initCanvas, activeObject, setActiveObject }: any = useContext(CanvasContext);
+  const { setPsd , descendants , setDescendants }: any = useContext(PsdContext);
 
   // state
   const [bgHasDone, setBgHasDone] = useState<boolean>(false);
@@ -26,7 +25,7 @@ function ViewAdapter() {
 
   useEffect(() => {
     const getBackground = async () => {
-      if (!psd || isEmptyObject(psd)) {
+      if (!descendants) {
         return;
       }
 
@@ -34,10 +33,11 @@ function ViewAdapter() {
         return;
       }
 
-      const descendants = await psd.tree().descendants();
       if (descendants.length <= 0) {
         return;
       }
+
+      console.log(descendants)
 
       const layerBackground = descendants.find((desc: any) => desc.name === NAME_BACKGROUND);
       if (!layerBackground || isEmptyObject(layerBackground)) {
@@ -84,15 +84,13 @@ function ViewAdapter() {
     }
 
     getBackground();
-  }, [psd, canvas])
+  }, [descendants , canvas])
 
   useEffect(() => {
     const getLayers = async () => {
       if (!bgHasDone) {
         return;
       }
-
-      const descendants = await psd.tree().descendants().reverse();
 
       const numScale = numScaleRef.current;
 
@@ -107,7 +105,6 @@ function ViewAdapter() {
           return;
         }
 
-        const id = createIdByParentName(desc);
         const isVisible = getVisibleStateByParent(desc);
 
         const { coords } = desc;
@@ -122,7 +119,7 @@ function ViewAdapter() {
             fontFamily: 'Verdana',
             fill: 'black'
           });
-          text.id = id;
+          text.id = desc.id;
           text.visible = isVisible;
 
           canvas.add(text);
@@ -138,7 +135,7 @@ function ViewAdapter() {
             img.bottom = coords.bottom / numScale;
             img.right = coords.right / numScale;
 
-            img.id = id;
+            img.id = desc.id;
             img.visible = isVisible;
 
             canvas.add(img);
@@ -170,9 +167,11 @@ function ViewAdapter() {
     if (!e) {
       return
     }
-    setActiveObject(canvas.getActiveObject())
+    setActiveObject(canvas.getActiveObject());
+
+    console.log(canvas.getActiveObject())
     canvas.renderAll()
-  }, [canvas])
+  }, [canvas ,  setActiveObject])
 
 
   function preventCanvas(e: any) {
@@ -276,12 +275,12 @@ function ViewAdapter() {
   const backToDropZone = () => {
     setPsd(null)
     setActiveObject(null)
-
+    setDescendants([])
     canvas?.clear();
   }
 
   const exportToJson = () => {
-
+    console.log(descendants)
   }
 
   return {

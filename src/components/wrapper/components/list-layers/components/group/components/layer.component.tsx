@@ -2,7 +2,6 @@ import React, { useContext } from 'react';
 import "./layer.scss";
 import { BiImage , BiText } from 'react-icons/bi'
 import { CanvasContext } from 'contexts/canvas/provider';
-import createIdByParentName from 'libraries/functions/create-id-by-parent-name';
 import getVisibleStateByParent from 'libraries/functions/get-visible-state-by-parent';
 
 function LayerComponent(props:any) {
@@ -10,7 +9,7 @@ function LayerComponent(props:any) {
   
   const { canvas , activeObject }:any = useContext(CanvasContext);
 
-  const id = createIdByParentName(child);
+  const id = child.id;
 
   const showId = () =>{
 

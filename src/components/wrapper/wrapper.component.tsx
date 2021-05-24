@@ -11,6 +11,7 @@ function WrapperComponent() {
     children  
   } = WrapperAdapter();
 
+
   return (
     <section className={"wrapper " + (isDisplayed ? "" : "d-none")}>
       <ListLayersComponent 

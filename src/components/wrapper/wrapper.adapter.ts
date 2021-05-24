@@ -6,28 +6,27 @@ import isEmptyObject from '../../libraries/utils/is-empty-object';
 function WrapperAdapter() {
 
   // context
-  const { psd }:any = useContext(PsdContext);
+  const { psd , descendants }:any = useContext(PsdContext);
 
   // state
   const [isDisplayed , setIsDisplayed] = useState<boolean>(true);
   const [children , setChildren] = useState<any>([]);
 
   useEffect(() => {
-    if(psd && !isEmptyObject(psd)){
-
+    if(descendants && descendants.length > 0){
       !isDisplayed && setIsDisplayed(true);
     } else{
       isDisplayed && setIsDisplayed(false);
     }
-  } , [psd])
+  } , [descendants])
 
   useEffect(() => {
-    if(psd && !isEmptyObject(psd)){
-      setChildren(psd.tree()._children);
+    if(descendants && descendants.length > 0){
+      setChildren(descendants);
     } else{
       setChildren([])
     }
-  } , [psd])
+  } , [descendants])
   
   return {
     isDisplayed,

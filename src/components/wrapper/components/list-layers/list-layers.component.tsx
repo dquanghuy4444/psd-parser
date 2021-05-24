@@ -6,6 +6,8 @@ import "./list-layers.scss";
 function ListLayersComponent(props:any) {
   const { children } = props;
 
+  console.log(children)
+
   const showListLayers = () =>{
     return children.map((child : any , item:number) =>{
       if(child._children.length > 0){

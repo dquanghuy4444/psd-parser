@@ -1,9 +1,10 @@
 import { createContext , useReducer } from "react";
-import { ADD_PSD } from "./actions";
+import { SET_DESCENDENTS, SET_PSD } from "./actions";
 import psdReducer from "./reducer";
 
 type State = {
   psd:any,
+  descendants:any[]
 }
 
 type Props = {
@@ -13,7 +14,8 @@ type Props = {
 const PsdContext = createContext([]);
 
 const intialState:State = {
-  psd: null
+  psd: null,
+  descendants:[]
 };
 
 
@@ -23,8 +25,15 @@ const PsdProvider = ({ children }: Props) => {
 
   const setPsd = (psd:any = {}) => {
     dispatch({
-      type: ADD_PSD,
+      type: SET_PSD,
       payload: psd,
+    });
+  };
+
+  const setDescendants = (descendants:any = []) => {
+    dispatch({
+      type: SET_DESCENDENTS,
+      payload: descendants,
     });
   };
 
@@ -32,7 +41,8 @@ const PsdProvider = ({ children }: Props) => {
     <PsdContext.Provider
       value={{
         ...state,
-        setPsd
+        setPsd,
+        setDescendants
       }}
     >
       { children }
